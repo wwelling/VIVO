@@ -2,7 +2,10 @@
 
 package edu.cornell.mannlib.vitro.webapp.visualization.personpubcount;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.rdf.model.Model;
@@ -37,10 +40,10 @@ import edu.cornell.mannlib.vitro.webapp.visualization.visutils.QueryRunner;
 /**
  * This query runner is used to execute a sparql query that will fetch all the publications
  * defined by bibo:Document property for a particular individual.
- *
+ * 
  * @author cdtank
  */
-public class PersonPublicationCountQueryRunner implements QueryRunner<Set<Activity>> {
+public class PersonPublicationCountQueryRunner implements QueryRunner<Collection<Activity>> {
 
 	protected static final Syntax SYNTAX = Syntax.syntaxARQ;
 
@@ -111,11 +114,11 @@ public class PersonPublicationCountQueryRunner implements QueryRunner<Set<Activi
 							+ "}\n";
 
 		log.debug(sparqlQuery);
-
+		
 		return sparqlQuery;
 	}
 
-	public Set<Activity> getQueryResult()
+	public Collection<Activity> getQueryResult()
 		throws MalformedQueryParametersException {
 
         if (StringUtils.isNotBlank(this.personURI)) {
@@ -131,7 +134,7 @@ public class PersonPublicationCountQueryRunner implements QueryRunner<Set<Activi
                 throw new MalformedQueryParametersException(
                 		"URI provided for an individual is malformed.");
             }
-
+        	
         } else {
         	throw new MalformedQueryParametersException("URL parameter is either null or empty.");
         }
@@ -159,27 +162,30 @@ public class PersonPublicationCountQueryRunner implements QueryRunner<Set<Activi
 	}
 
 	private static class PersonPublicationConsumer extends ResultSetConsumer {
-		Set<Activity> authorDocuments = new HashSet<Activity>();
+		Map<String, Activity> authorDocuments = new HashMap<>();
 
 		@Override
 		protected void processQuerySolution(QuerySolution qs) {
-			Activity biboDocument = new Activity(qs.get("document").asResource().getURI());
+			String documentUri = qs.get("document").asResource().getURI();
+			if (!authorDocuments.containsKey(documentUri)) {
+				Activity biboDocument = new Activity(documentUri);
 
-			RDFNode publicationDateNode = qs.get("publicationDate");
-			if (publicationDateNode != null) {
-				biboDocument.setActivityDate(publicationDateNode.asLiteral().getString());
+				RDFNode publicationDateNode = qs.get("publicationDate");
+				if (publicationDateNode != null) {
+					biboDocument.setActivityDate(publicationDateNode.asLiteral().getString());
+				}
+
+				RDFNode publicationType = qs.get("publicationType");
+				if (publicationType != null) {
+					biboDocument.addActivityType(publicationType.asResource().getURI());
+				}
+
+				authorDocuments.put(documentUri, biboDocument);
 			}
-
-			RDFNode publicationType = qs.get("publicationType");
-			if (publicationType != null) {
-				biboDocument.setActivityType(publicationType.asResource().getURI());
-			}
-
-			authorDocuments.add(biboDocument);
 		}
 
-		public Set<Activity> getAuthorDocuments() {
-			return authorDocuments;
+		public Collection<Activity> getAuthorDocuments() {
+			return authorDocuments.values();
 		}
 	}
 }
