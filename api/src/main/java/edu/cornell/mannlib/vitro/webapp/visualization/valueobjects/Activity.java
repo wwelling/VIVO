@@ -39,11 +39,6 @@ public class Activity extends Individual {
 
 	public void addActivityType(String activityType) { this.activityTypes.add(activityType); }
 
-<<<<<<< HEAD
-=======
-	public void setActivityType(String activityType) { this.activityType = activityType; }
-
->>>>>>> develop
 	/**
 	 * This method will be called to get the final/inferred year for the publication.
 	 * The 2 choices, in order, are,
