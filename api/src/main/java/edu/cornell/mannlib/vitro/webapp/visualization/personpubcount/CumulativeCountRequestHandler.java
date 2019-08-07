@@ -124,7 +124,7 @@ public class CumulativeCountRequestHandler implements VisualizationRequestHandle
         for (String groupName : pubsGroups) {
             // Retrieve a label from the i18n file
             String label = I18n.text(vitroRequest, "histogram_label_for_" + groupName);
-            if (!StringUtils.isEmpty(label)) {
+            if (!StringUtils.isEmpty(label) && !StringUtils.startsWith(label, "ERROR: ")) {
                 csv.append(",").append(label);
             } else {
                 // No label, so use the group name
