@@ -26,6 +26,7 @@
     :hasSearchIndexer             :basicSearchIndexer ;
     :hasImageProcessor            :iioImageProcessor ;
     :hasFileStorage               :ptiFileStorage ;
+#    :hasMessaging                 :jsmMessaging ;
     :hasContentTripleSource       :tdbContentTripleSource ;
     :hasConfigurationTripleSource :tdbConfigurationTripleSource ;
     :hasTBoxReasonerModule        :jfactTBoxReasonerModule .
@@ -138,3 +139,24 @@
 :jfactTBoxReasonerModule
     a   vitroWebapp:tboxreasoner.impl.jfact.JFactTBoxReasonerModule ,
         vitroWebapp:modules.tboxreasoner.TBoxReasonerModule .
+
+# ----------------------------
+#
+# JMS Messaging Client Module:
+#    JNDI implementation of a messaging client used to publish messages
+#    to a broker. Requires an external message broker. Has been tested
+#    against Artemis ActiveMQ topic. https://activemq.apache.org/components/artemis/
+#
+
+:jsmMessaging
+    a   vitroWebapp:messaging.MessagingImpl ,
+        vitroWebapp:modules.messaging.Messaging ;
+    # JNDI property java.naming.factory.initial
+    :hasFactoryInitial "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory" ;
+    # JNDI property java.naming.provider.url
+    :hasProviderURL "tcp://localhost:61616?type=TOPIC_CF" ;
+    :hasConnectionFactory "TopicConnectionFactory" ;
+    :hasBrokerDestination "topic/vitro" ;
+    :hasBrokerType "topic" ;
+    :hasBrokerUsername "artemis" ;
+    :hasBrokerPassword "artemis" .
